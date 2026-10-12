@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: #171512;
+  --color-secondary: #292b2d;
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: #252729;
+  --color-muted-foreground: #a8abb0;
+  --color-accent: #303034;
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: #ef8888;
+  --color-border: #343639;
+  --color-input: #343639;
+  --color-ring: var(--primary);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+:root {
+  color-scheme: dark;
+  --background: #111213;
+  --foreground: #f3f1ed;
+  --card: #1a1c1e;
+  --primary: #dfc497;
+  --surface-raised: #202225;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply m-0 min-w-0 bg-background text-foreground antialiased;
+    background-image: radial-gradient(circle at 88% -10%, rgba(223, 196, 151, 0.055), transparent 28rem);
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+  input[type="checkbox"] {
+    accent-color: var(--primary);
+  }
+}
+@layer components {
+  .panel {
+    @apply min-w-0 rounded-xl border border-border/80 bg-card p-4 shadow-[0_12px_34px_rgba(0,0,0,0.08)] sm:p-6;
+  }
+  .form-grid {
+    @apply grid gap-5 md:grid-cols-2;
+  }
+  .page-heading {
+    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+  }
+  .muted {
+    @apply text-sm text-muted-foreground;
+  }
+  .actions {
+    @apply flex min-w-0 flex-wrap items-center gap-2;
+  }
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+  .data-table th {
+    @apply sticky top-0 z-[1] bg-[#202225] px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground;
+  }
+  .data-table td {
+    @apply border-t px-4 py-4 align-middle;
+  }
+  .data-table tbody tr {
+    @apply transition-colors hover:bg-muted/40;
+  }
+  .data-table .actions { @apply max-w-md; }
+  .data-table td { overflow-wrap: anywhere; }
+  @media (max-width: 767px) {
+    .data-table { display: block; min-width: 0; }
+    .data-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .data-table tbody { display: block; }
+    .data-table tr { display: block; padding: 16px; border-bottom: 1px solid var(--color-border); }
+    .data-table td { display: block; border: 0; padding: 6px 0; }
+    .data-table td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--color-muted-foreground); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  }
+  @media (pointer: coarse) {
+    button, [role="button"], [role="combobox"] { min-height: 44px; }
+  }
+}
