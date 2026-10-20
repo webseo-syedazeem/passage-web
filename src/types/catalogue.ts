@@ -50,6 +50,7 @@ export interface Soundscape {
   artwork_url?: string | null;
   file_url?: string | null;
   preview_url?: string | null;
+  detail_description?: string | null;
   collection_sort_order?: number;
   [field: string]: string | number | boolean | string[] | null | undefined;
 }

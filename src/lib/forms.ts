@@ -35,6 +35,7 @@ export const soundFields: FieldSpec[] = [
   text("catalogue_ref", "Catalogue reference"),
   text("artwork_url", "Artwork URL", "url"),
   text("one_line_description", "One-line description"),
+  text("detail_description", "Detail description", "textarea"),
   text("designed_for", "Designed for", "textarea"),
   text("best_use", "Best use", "textarea"),
   ...arrayFields

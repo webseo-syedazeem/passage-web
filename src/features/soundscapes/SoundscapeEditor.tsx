@@ -154,6 +154,7 @@ const soundSections = [
       "mode",
       "subcategory",
       "one_line_description",
+      "detail_description",
       "designed_for",
       "best_use",
       "search_keywords",

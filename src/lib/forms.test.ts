@@ -18,6 +18,7 @@ describe("Legacy payload contracts", () => {
         "catalogue_ref",
         "artwork_url",
         "one_line_description",
+        "detail_description",
         "designed_for",
         "best_use",
         "contains",
