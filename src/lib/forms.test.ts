@@ -8,6 +8,16 @@ import {
   soundFields,
 } from "./forms";
 describe("Legacy payload contracts", () => {
+  it("validates and preserves the optional player colour", () => {
+    const values = { ...defaults(soundFields), mode: "relax", title: "Coast", subcategory: "Waves", colour: "#326C82" };
+    expect(formSchema(soundFields).safeParse(values).success).toBe(true);
+    expect(serialize(soundFields, values, true).colour).toBe("#326C82");
+    expect(defaults(soundFields, { colour: "#326C82" }).colour).toBe("#326C82");
+    for (const colour of ["red", "#abc", "#ZZ0000", "rgb(0,0,0)"]) {
+      expect(formSchema(soundFields).safeParse({ ...values, colour }).success).toBe(false);
+    }
+    expect(serialize(soundFields, { ...values, colour: "" }, true).colour).toBeNull();
+  });
   it("keeps every legacy soundscape field and adds the supported preview URL", () => {
     expect(soundFields.map((field) => field.name).sort()).toEqual(
       [
@@ -19,6 +29,7 @@ describe("Legacy payload contracts", () => {
         "artwork_url",
         "one_line_description",
         "detail_description",
+        "colour",
         "designed_for",
         "best_use",
         "contains",

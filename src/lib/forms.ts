@@ -36,6 +36,7 @@ export const soundFields: FieldSpec[] = [
   text("artwork_url", "Artwork URL", "url"),
   text("one_line_description", "One-line description"),
   text("detail_description", "Detail description", "textarea"),
+  { name: "colour", label: "Player colour", hint: "Hex colour, e.g. #326C82. Used by the Play button and mini player." },
   text("designed_for", "Designed for", "textarea"),
   text("best_use", "Best use", "textarea"),
   ...arrayFields
@@ -151,6 +152,8 @@ export function formSchema(fields: FieldSpec[]) {
           ctx.addIssue({ code: "custom", path: [field.name], message });
         if (field.required && !value) issue(`${field.label} is required`);
         if (!value) continue;
+        if (field.name === "colour" && !/^#[0-9a-f]{6}$/i.test(value))
+          issue("Enter a six-digit hex colour, e.g. #326C82");
         if (field.options && !field.options.includes(value))
           issue("Choose a supported value");
         if (
