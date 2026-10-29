@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { AudioLines, FolderOpen, SlidersHorizontal, Menu, LogOut, LifeBuoy, ShieldCheck } from "lucide-react";
+import { Activity, AudioLines, FolderOpen, SlidersHorizontal, Menu, LogOut, LifeBuoy, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/app/Auth";
 import { BrandIcon } from "@/components/shared/BrandIcon";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const navigation = [
+  { path: "/monitoring", label: "Monitoring", icon: Activity },
   { path: "/soundscapes", label: "Soundscapes", icon: AudioLines },
   { path: "/collections", label: "Collections", icon: FolderOpen },
   { path: "/remote-config", label: "Remote config", icon: SlidersHorizontal },

@@ -48,6 +48,11 @@ const RemoteEditor = lazy(() =>
     default: m.RemoteEditor,
   })),
 );
+const MonitoringDashboard = lazy(() =>
+  import("@/features/monitoring/MonitoringDashboard").then((m) => ({
+    default: m.MonitoringDashboard,
+  })),
+);
 export function AdminRoutes() {
   const { signedIn } = useAuth();
   return (
@@ -63,7 +68,8 @@ export function AdminRoutes() {
         <Route
           element={signedIn ? <Shell /> : <Navigate to="/login" replace />}
         >
-          <Route index element={<Navigate to="/soundscapes" replace />} />
+          <Route index element={<Navigate to="/monitoring" replace />} />
+          <Route path="monitoring" element={<MonitoringDashboard />} />
           <Route path="soundscapes" element={<SoundscapeList />} />
           <Route path="soundscapes/new" element={<SoundscapeEditor />} />
           <Route path="soundscapes/:id" element={<SoundscapeEditor />} />

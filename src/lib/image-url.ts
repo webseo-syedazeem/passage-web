@@ -3,7 +3,7 @@
  * the backend (see Backend local/lib/imageVariants.js + server.ts), so the admin panel requests
  * a right-sized image instead of the up-to-~1.8MB master copy for every row/preview.
  *
- * Mirrors Haven/lib/image-url.ts (the mobile app's equivalent helper) so both clients agree on
+ * Mirrors the mobile app's `lib/image-url.ts` helper so both clients agree on
  * how variant URLs are derived from the original.
  *
  * Only touches URLs whose path contains `/passage_soundscape_images_webp/` and that are not
