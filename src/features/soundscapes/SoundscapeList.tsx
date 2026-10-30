@@ -175,7 +175,7 @@ function SoundscapeRow({ row }: { row: Soundscape }) {
           <Button
             variant="outline"
             size="sm"
-            disabled={update.isPending}
+            disabled={update.isPending || status === row.status}
             onClick={() => update.mutate(status, { onSettled: () => setStatusChoice(null) })}
           >
             {update.isPending ? "Working…" : "Update status"}

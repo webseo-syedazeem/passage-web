@@ -37,6 +37,13 @@ function RemoteForm({ entry }: { entry?: RemoteEntry }) {
     resolver: zodResolver(formSchema(remoteFields)),
     defaultValues: defaults(remoteFields, entry),
   });
+  // SEC-2: creating a key that already exists is an upsert on the backend, so
+  // load the current keys to warn before an accidental overwrite.
+  const existingEntries = useQuery({
+    queryKey: ["remote-config"],
+    queryFn: ({ signal }) => remoteApi.list(signal),
+    enabled: !entry,
+  });
   const save = useAdminMutation(
     (values: FormValues) =>
       remoteApi.save(
@@ -47,6 +54,30 @@ function RemoteForm({ entry }: { entry?: RemoteEntry }) {
     "Remote config saved",
     () => navigate("/remote-config"),
   );
+  const submit = (values: FormValues) => {
+    // On create, block a silent overwrite of an existing (possibly public) key.
+    if (!entry) {
+      const newKey = String(values.key).trim();
+      const clash = existingEntries.data?.some((item) => item.key === newKey);
+      if (
+        clash &&
+        !window.confirm(
+          `A remote config entry named "${newKey}" already exists. Saving will overwrite it — continue?`,
+        )
+      )
+        return;
+    }
+    // Publishing a verified value exposes it through the public API.
+    if (
+      values.is_verified === true &&
+      !entry?.is_verified &&
+      !window.confirm(
+        "This value will be marked Verified and served through the public API. Continue?",
+      )
+    )
+      return;
+    save.mutate(values);
+  };
   return (
     <>
       <PageHeading
@@ -59,7 +90,7 @@ function RemoteForm({ entry }: { entry?: RemoteEntry }) {
       </PageHeading>
       <form
         className="panel space-y-6"
-        onSubmit={form.handleSubmit((values) => save.mutate(values))}
+        onSubmit={form.handleSubmit(submit)}
       >
         <FormFields
           fields={remoteFields}

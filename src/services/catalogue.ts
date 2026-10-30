@@ -15,6 +15,9 @@ export const authApi = {
       method: "POST",
       body: { email, password },
     }),
+  // AU-2: revoke the session server-side on logout. The backend /api/logout
+  // calls Supabase admin signOut, so the token stops working everywhere.
+  signOut: () => request<{ message?: string }>("/api/logout", { method: "POST" }),
 };
 export const soundscapeApi = {
   list: async (status = "", signal?: AbortSignal) =>

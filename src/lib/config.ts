@@ -18,4 +18,17 @@ export function normalizeApiBase(value: string | undefined): string {
   }
   return url.origin;
 }
-export const apiBase = normalizeApiBase(import.meta.env.VITE_API_BASE_URL);
+// Resolve the API origin WITHOUT throwing at module import: a thrown error here
+// used to abort React before it mounted, leaving a blank white page with no
+// explanation (audit PR-1). Instead capture the problem so the app can render a
+// visible configuration-error screen.
+let resolvedBase = "";
+let resolvedError: string | null = null;
+try {
+  resolvedBase = normalizeApiBase(import.meta.env.VITE_API_BASE_URL);
+} catch (error) {
+  resolvedError =
+    error instanceof Error ? error.message : "The API base URL is not configured correctly.";
+}
+export const apiBase = resolvedBase;
+export const configError = resolvedError;

@@ -188,4 +188,25 @@ describe("Legacy payload contracts", () => {
       }).success,
     ).toBe(true);
   });
+  it("allows ordinary wording and checks all listener-facing fields (FV-1)", () => {
+    const values = {
+      ...defaults(soundFields),
+      mode: "focus",
+      title: "Focus",
+      subcategory: "Piano",
+    };
+    // Word-boundary matching: these are no longer false positives.
+    for (const science_note of ["Supports healthy sleep routines", "Secure, calm atmosphere"]) {
+      expect(
+        formSchema(soundFields).safeParse({ ...values, science_note }).success,
+      ).toBe(true);
+    }
+    // A genuine claim is caught in a description field, not only science_note.
+    expect(
+      formSchema(soundFields).safeParse({
+        ...values,
+        one_line_description: "Cures anxiety overnight",
+      }).success,
+    ).toBe(false);
+  });
 });

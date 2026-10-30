@@ -14,6 +14,14 @@ const duration = (seconds: number) => {
   return hours ? `${hours}h ${minutes}m` : `${minutes}m`
 }
 const label = (value: string) => value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+// SEC-3: don't show full listener emails on an always-open, auto-refreshing,
+// often-screen-shared dashboard. Keep enough to recognise an account on follow-up.
+const maskEmail = (email: string) => {
+  const [localPart, domain] = email.split('@')
+  if (!domain) return email
+  const head = localPart.slice(0, 1)
+  return `${head}${'•'.repeat(Math.max(localPart.length - 1, 1))}@${domain}`
+}
 
 function Bars({ rows, empty }: { rows: CountRow[]; empty: string }) {
   if (!rows.length) return <p className="muted py-5">{empty}</p>
@@ -56,7 +64,7 @@ export function MonitoringDashboard() {
           <span className={`flex size-11 items-center justify-center rounded-full ${data.health.status === 'ok' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-destructive/15 text-destructive'}`}>
             {data.health.status === 'ok' ? <Wifi size={21} /> : <WifiOff size={21} />}
           </span>
-          <div><p className="font-semibold">{data.health.status === 'ok' ? 'All systems operational' : 'Service unavailable'}</p><p className="muted">Supabase {data.health.checks.supabase.status} · {data.health.checks.supabase.latency_ms} ms · API uptime {duration(data.health.uptime_seconds)}</p></div>
+          <div><p className="font-semibold">{data.health.status === 'ok' ? 'All systems operational' : 'Service unavailable'}</p><p className="muted">Supabase {data.health.checks?.supabase?.status ?? 'unknown'}{data.health.checks?.supabase?.latency_ms != null ? ` · ${data.health.checks.supabase.latency_ms} ms` : ''}{data.health.uptime_seconds != null ? ` · API uptime ${duration(data.health.uptime_seconds)}` : ''}</p></div>
         </div>
         <Badge variant="outline">Auto-refreshes every minute</Badge>
       </section>
@@ -75,9 +83,9 @@ export function MonitoringDashboard() {
         </tbody></table></div>
       </section>
       <section className="panel">
-        <h2 className="mb-1 font-semibold">Recent listener activity</h2><p className="muted mb-5">Privacy-safe operational events only; reflections and health data are never included.</p>
+        <h2 className="mb-1 font-semibold">Recent listener activity</h2><p className="muted mb-5">Privacy-safe operational events only; free-form user content is never included.</p>
         <div className="overflow-x-auto"><table className="data-table"><thead><tr><th>Event</th><th>Listener</th><th>Details</th><th>Time</th></tr></thead><tbody>
-          {data.recent_activity.map((event) => <tr key={event.id}><td data-label="Event"><Badge variant="outline">{label(event.event_name)}</Badge></td><td data-label="Listener"><p>{event.user?.name || (event.user ? 'Registered listener' : 'Guest')}</p><p className="mt-1 text-xs text-muted-foreground">{event.user?.email || event.session_id || 'Anonymous session'}</p></td><td data-label="Details" className="max-w-md text-xs text-muted-foreground">{Object.entries(event.details).map(([key, value]) => `${label(key)}: ${String(value)}`).join(' · ') || '—'}</td><td data-label="Time" className="text-xs text-muted-foreground">{dateLabel(event.created_at)}</td></tr>)}
+          {data.recent_activity.map((event) => <tr key={event.id}><td data-label="Event"><Badge variant="outline">{label(event.event_name)}</Badge></td><td data-label="Listener"><p>{event.user?.name || (event.user ? 'Registered listener' : 'Guest')}</p><p className="mt-1 text-xs text-muted-foreground">{event.user?.email ? maskEmail(event.user.email) : (event.session_id || 'Anonymous session')}</p></td><td data-label="Details" className="max-w-md text-xs text-muted-foreground">{Object.entries(event.details).map(([key, value]) => `${label(key)}: ${String(value)}`).join(' · ') || '—'}</td><td data-label="Time" className="text-xs text-muted-foreground">{dateLabel(event.created_at)}</td></tr>)}
         </tbody></table></div>
       </section>
     </>}

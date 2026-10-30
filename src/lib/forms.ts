@@ -124,23 +124,31 @@ export const tagFields: FieldSpec[] = [
   { name: "state", label: "State", required: true, options: tagStates },
   text("source", "Source"),
 ];
-const prohibited = [
-  "heal",
-  "repair dna",
-  "repairs dna",
-  "dna repair",
-  "guarantee sleep",
-  "guarantees sleep",
-  "guarantee productivity",
-  "guarantees productivity",
-  "cure",
-  "cures",
-  "treats anxiety",
-  "treat anxiety",
-  "force a brain state",
-  "forces a brain state",
-  "brainwave entrainment guarantee",
+// FV-1: word-boundary patterns, not substring matching, so ordinary copy like
+// "healthy", "secure" or "obscure" is no longer wrongly rejected while genuine
+// medical claims ("heals", "cures") still are.
+const prohibitedClaimPatterns: RegExp[] = [
+  /\bheals?\b/i,
+  /\bhealing\b/i,
+  /\brepairs?\s+dna\b/i,
+  /\bdna\s+repair\b/i,
+  /\bguarantees?\s+sleep\b/i,
+  /\bguarantees?\s+productivity\b/i,
+  /\bcures?\b/i,
+  /\btreats?\s+anxiety\b/i,
+  /\bforces?\s+a\s+brain\s+state\b/i,
+  /\bbrainwave\s+entrainment\s+guarantee\b/i,
 ];
+
+// Every listener-facing field, not just science_note — a medical claim is just
+// as prohibited in the description or "best for" copy (FV-1).
+const claimCheckedFields = new Set([
+  "science_note",
+  "one_line_description",
+  "detail_description",
+  "designed_for",
+  "best_use",
+]);
 export function formSchema(fields: FieldSpec[]) {
   return z
     .record(z.string(), z.union([z.string(), z.boolean()]))
@@ -186,11 +194,11 @@ export function formSchema(fields: FieldSpec[]) {
           }
         }
         if (
-          field.name === "science_note" &&
-          prohibited.some((phrase) => value.toLowerCase().includes(phrase))
+          claimCheckedFields.has(field.name) &&
+          prohibitedClaimPatterns.some((pattern) => pattern.test(value))
         )
           issue(
-            "Contains a prohibited claim phrase. Use evidence-supported, research-informed, experimental or experiential framing.",
+            "Contains a prohibited health claim. Use evidence-supported, research-informed, experimental or experiential framing.",
           );
       }
     });

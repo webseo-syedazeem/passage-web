@@ -48,8 +48,12 @@ describe("Direct API configuration and media", () => {
     expect(assetUrl("javascript:alert(1)")).toBeUndefined();
     expect(assetUrl("//untrusted.example/image")).toBeUndefined();
   });
-  it("fails rather than falling back to the frontend origin", async () => {
+  it("surfaces a config error instead of falling back to the frontend origin (PR-1)", async () => {
     vi.stubEnv("VITE_API_BASE_URL", "");
-    await expect(import("./api")).rejects.toThrow("VITE_API_BASE_URL");
+    // Importing must NOT throw at module load (that blanked the page); it
+    // records the problem so the app can render a readable config-error screen.
+    const { apiBase, configError } = await import("./config");
+    expect(apiBase).toBe("");
+    expect(configError).toMatch("VITE_API_BASE_URL");
   });
 });

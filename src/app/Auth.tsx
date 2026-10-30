@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   useCallback,
   type ReactNode,
@@ -20,20 +21,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const signOut = useCallback(() => {
+  // AU-4: several parallel requests can 401 at once; only handle the first.
+  const expiryHandledRef = useRef(false);
+
+  const clearSession = useCallback(() => {
     setToken(null);
     setSignedIn(false);
     setEmail(null);
     void queryClient.cancelQueries();
     queryClient.clear();
   }, [queryClient]);
+
+  const signOut = useCallback(() => {
+    // AU-2: best-effort server-side revocation while the token is still set.
+    // (request() reads the in-memory token synchronously, before this returns.)
+    void authApi.signOut().catch(() => {});
+    clearSession();
+  }, [clearSession]);
+
   useEffect(() => {
     onSessionExpired(() => {
-      signOut();
+      if (expiryHandledRef.current) return;
+      expiryHandledRef.current = true;
+      // The token is already invalid here, so skip the server call (and the
+      // 401 loop it would cause) and just clear local state.
+      clearSession();
       toast.error("Your session expired. Please sign in again.");
     });
-  }, [signOut]);
+  }, [clearSession]);
+
   const signIn = async (email: string, password: string) => {
+    expiryHandledRef.current = false;
     setToken(null);
     const result = await authApi.signIn(email.trim(), password);
     if (!result.session?.access_token)

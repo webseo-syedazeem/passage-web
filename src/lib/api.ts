@@ -16,6 +16,9 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+const REQUEST_TIMEOUT_MS = 20_000;
+const UPLOAD_TIMEOUT_MS = 60_000;
+
 export async function request<T>(
   path: string,
   options: { method?: string; body?: unknown; signal?: AbortSignal } = {},
@@ -25,12 +28,28 @@ export async function request<T>(
   if (options.body !== undefined && !multipart)
     headers["Content-Type"] = "application/json";
   if (token) headers.Authorization = `Bearer ${token}`;
+
+  // API-1: bound every request so a hung backend can't leave buttons stuck in
+  // "Saving…" indefinitely. The timeout controller is combined with the
+  // caller's own abort signal so neither is lost.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, multipart ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
+  const onCallerAbort = () => controller.abort(options.signal?.reason);
+  if (options.signal) {
+    if (options.signal.aborted) controller.abort(options.signal.reason);
+    else options.signal.addEventListener("abort", onCallerAbort, { once: true });
+  }
+
   let response: Response;
   try {
     response = await fetch(`${base}${path}`, {
       method: options.method || "GET",
       headers,
-      signal: options.signal,
+      signal: controller.signal,
       body:
         options.body === undefined
           ? undefined
@@ -39,11 +58,19 @@ export async function request<T>(
             : JSON.stringify(options.body),
     });
   } catch (error) {
+    // A caller-initiated cancellation must still surface as an AbortError so
+    // TanStack Query treats it as a cancelled query, not a failure.
+    if (options.signal?.aborted) throw error;
+    if (timedOut)
+      throw new ApiError("The server took too long to respond. Please try again.", 0);
     if (error instanceof Error && error.name === "AbortError") throw error;
     throw new ApiError(
       "Cannot reach the server. Check your connection and try again.",
       0,
     );
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onCallerAbort);
   }
   const payload: { success?: boolean; error?: string; data?: T } =
     response.headers.get("content-type")?.includes("application/json")

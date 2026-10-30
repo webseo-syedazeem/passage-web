@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { Activity, AudioLines, FolderOpen, SlidersHorizontal, Menu, LogOut, LifeBuoy, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/app/Auth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { BrandIcon } from "@/components/shared/BrandIcon";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -54,7 +55,7 @@ export function Shell() {
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={auth.signOut} aria-label="Log out"><LogOut /></Button>
         </div>
       </header>
-      <main id="main-content" className="mx-auto min-w-0 max-w-[1500px] px-4 py-6 sm:px-7 sm:py-8 lg:px-8"><Outlet /></main>
+      <main id="main-content" className="mx-auto min-w-0 max-w-[1500px] px-4 py-6 sm:px-7 sm:py-8 lg:px-8"><ErrorBoundary title="This page couldn’t load" resetKey={location.pathname}><Outlet /></ErrorBoundary></main>
     </div>
   </div>;
 }
