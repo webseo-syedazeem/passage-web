@@ -29,6 +29,7 @@ export function RemoteList() {
         description="Manage verified public content and configuration."
       >
         <RefreshButton busy={query.isFetching} onClick={query.refetch} />
+        <Button variant="outline" asChild><Link to="/remote-config/testimonials">Manage testimonials</Link></Button>
         <Button asChild>
           <Link to="/remote-config/new">
             <Plus />

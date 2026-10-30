@@ -48,6 +48,7 @@ const RemoteEditor = lazy(() =>
     default: m.RemoteEditor,
   })),
 );
+const TestimonialsEditor = lazy(() => import("@/features/remote-config/TestimonialsEditor").then((m) => ({ default: m.TestimonialsEditor })));
 const MonitoringDashboard = lazy(() =>
   import("@/features/monitoring/MonitoringDashboard").then((m) => ({
     default: m.MonitoringDashboard,
@@ -79,6 +80,7 @@ export function AdminRoutes() {
           <Route path="collections/:id/edit" element={<CollectionEditor />} />
           <Route path="remote-config" element={<RemoteList />} />
           <Route path="remote-config/new" element={<RemoteEditor />} />
+          <Route path="remote-config/testimonials" element={<TestimonialsEditor />} />
           <Route path="remote-config/:key/edit" element={<RemoteEditor />} />
           <Route path="support" element={<SupportList />} />
           <Route path="support/:id" element={<SupportDetail />} />
